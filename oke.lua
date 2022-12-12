@@ -95,3 +95,43 @@ local httpService = game:GetService('HttpService')
 
 local framework, scrollHandler, network
 local counter = 0
+
+while true do
+    for _, obj in next, getgc(true) do
+        if type(obj) == 'table' then 
+            if rawget(obj, 'GameUI') then
+                framework = obj;
+            elseif type(rawget(obj, 'Server')) == 'table' then
+                network = obj;     
+            end
+        end
+
+        if network and framework then break end
+    end
+
+    for _, module in next, getloadedmodules() do
+        if module.Name == 'ScrollHandler' then
+            scrollHandler = module;
+            break;
+        end
+    end 
+
+    if (type(framework) == 'table' and typeof(scrollHandler) == 'Instance' and type(network) == 'table') then
+        break
+    end
+
+    counter = counter + 1
+    if counter > 6 then
+        fail(string.format('Failed to load game dependencies. Details: %s, %s, %s', type(framework), typeof(scrollHandler), type(network)))
+    end
+    wait(1)
+end
+
+local runService = game:GetService('RunService')
+local userInputService = game:GetService('UserInputService')
+local virtualInputManager = game:GetService('VirtualInputManager')
+
+local random = Random.new()
+
+local task = task or getrenv().task;
+local fastWait, fastSpawn = task.wait, task.spawn;
